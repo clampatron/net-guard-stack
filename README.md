@@ -2,8 +2,6 @@
 
 **Author:** Andrew Clarke
 
-> This README reflects the **uploaded v1.0 baseline** exactly. No code changes have been made.
-
 ## Module path
 
 This repo wires the stack module at:
