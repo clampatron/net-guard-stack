@@ -1,53 +1,79 @@
 variable "subscription_id" {
-  type = string
+  type        = string
+  description = "Target subscription ID."
 }
 
 variable "location" {
-  type = string
+  type        = string
+  description = "Azure location for the Deployment Stack and regional resources."
+  default     = "uksouth"
 }
 
 variable "name_prefix" {
-  type = string
+  type        = string
+  description = "Prefix used to name the Deployment Stack."
 }
 
 variable "excluded_principals" {
-  type = list(string)
+  type        = list(string)
+  description = "Break-glass principals that bypass the stack's deny assignment."
+  default     = []
 }
 
 variable "excluded_actions" {
-  type = list(string)
+  type        = list(string)
+  description = "Actions permitted despite denyWriteAndDelete (to keep day-2 ops working)."
+  default     = [
+    "Microsoft.Network/virtualNetworks/subnets/join/action",
+    "Microsoft.Network/virtualNetworks/subnets/joinViaServiceEndpoint/action",
+    "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
+    "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action"
+  ]
 }
 
 variable "stack_api_version" {
-  type = string
+  type        = string
+  description = "API version for Microsoft.Resources/deploymentStacks."
+  default     = "2024-03-01"
 }
 
 variable "network_api_version" {
-  type = string
+  type        = string
+  description = "API version for Microsoft.Network resources."
+  default     = "2023-09-01"
 }
 
 variable "action_on_unmanage" {
   type = object({
-    managementGroups = optional(string)
-    resourceGroups   = optional(string)
-    resources        = optional(string)
+    managementGroups = optional(string, "detach")
+    resourceGroups   = optional(string, "detach")
+    resources        = optional(string, "detach")
   })
+
+  default = {
+    managementGroups = "detach"
+    resourceGroups   = "detach"
+    resources        = "detach"
+  }
 }
 
 variable "network_plan" {
+  description = "Declarative desired state for Net Guard (RG → VNets/Subnets/UDRs/NSGs/NAT)."
   type = map(object({
     vnets = map(object({
       address_space = list(string)
       location      = optional(string)
-      subnets       = map(object({
-        address_prefixes                     = list(string)
+      subnets = map(object({
+        address_prefixes                      = list(string)
         route_table_name                      = string
+        route_table_rg                        = optional(string)
         private_endpoint_network_policies     = optional(string)
         private_link_service_network_policies = optional(string)
         service_endpoints                     = optional(list(string))
         nsg_name                              = optional(string)
+        nsg_rg                                = optional(string)
         nat_gateway_name                      = optional(string)
-        delegations                           = optional(map(object({
+        delegations = optional(map(object({
           service_name = string
           actions      = optional(list(string))
         })))
@@ -65,18 +91,18 @@ variable "network_plan" {
 
     nsgs = optional(map(object({
       security_rules = map(object({
-        priority  = number
-        direction = string
-        access    = string
-        protocol  = string
-        source_address_prefixes      = optional(list(string))
-        destination_address_prefixes = optional(list(string))
+        priority                     = number
+        direction                    = string
+        access                       = string
+        protocol                     = string
         source_address_prefix        = optional(string)
         destination_address_prefix   = optional(string)
-        source_port_ranges           = optional(list(string))
-        destination_port_ranges      = optional(list(string))
+        source_address_prefixes      = optional(list(string))
+        destination_address_prefixes = optional(list(string))
         source_port_range            = optional(string)
         destination_port_range       = optional(string)
+        source_port_ranges           = optional(list(string))
+        destination_port_ranges      = optional(list(string))
         description                  = optional(string)
       }))
     })), {})

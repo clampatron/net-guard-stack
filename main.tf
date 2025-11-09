@@ -1,6 +1,3 @@
-
-# Deploy the Net Guard Stack module using variables for configuration.
-
 module "net_guard_stack" {
   source = "./modules/deployment-net-guard-stack"
 
@@ -17,22 +14,3 @@ module "net_guard_stack" {
 
   network_plan = var.network_plan
 }
-
-# Deploy the Net Guard Stack module using locals for configuration.
-
-# module "net_guard_stack" {
-#   source = "./modules/deployment-net-guard-stack"
-
-#   subscription_id     = local.subscription_id
-#   location            = local.location
-#   name_prefix         = local.name_prefix
-
-#   excluded_principals = local.excluded_principals
-#   excluded_actions    = local.excluded_actions
-#   action_on_unmanage  = local.action_on_unmanage
-
-#   stack_api_version   = local.stack_api_version
-#   network_api_version = local.network_api_version
-
-#   network_plan        = local.network_plan
-# }
